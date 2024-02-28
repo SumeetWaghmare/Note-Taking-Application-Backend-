@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <!-- Include Font Awesome library for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2; /* Background color for the container */
+        }
+
+        .heading {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .top {
+            margin-bottom: 20px;
+            text-align: center;
+            background-color: #fff; /* Background color for the top section */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a shadow for depth */
+        }
+
+        .top input[type="text"], 
+        .top textarea {
+            width: 500px; /* Adjust width as needed */
+            font-size: 16px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        .top .button-container {
+            width: 500px; /* Match the width of input and textarea */
+            text-align: center;
+            margin-top: 10px; /* Add some space between input and button */
+        }
+
+        .top .button-container button {
+            width: 100%; /* Make the button width same as input and textarea */
+            background-color: transparent; /* Transparent background color for the button */
+            color: #007bff; /* Text color for the button */
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .top .button-container button:hover {
+            color: #0056b3; /* Hover text color */
+        }
+
+        .todo {
+            text-align: center;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .note {
+            width: 30%; /* Each note takes 30% of the container width */
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative; /* Position for the edit and delete buttons */
+        }
+
+        /* Different background colors for alternate notes */
+        .note:nth-child(odd) {
+            background-color: #f7f7f7;
+        }
+
+        /* Define text alignment for each note */
+        .left {
+            text-align: left;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        /* Edit and delete button style */
+        .edit-button, .delete-button {
+            position: absolute;
+            top: 10px;
+            background-color: transparent; /* Transparent background color for the buttons */
+            color: #007bff; /* Text color for the buttons */
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .edit-button:hover, .delete-button:hover {
+            color: #0056b3; /* Hover text color */
+        }
+
+        .edit-button {
+            right: 40px; /* Position the edit button */
+        }
+
+        .delete-button {
+            right: 10px; /* Position the delete button */
+        }
+
+        .top .button-container button {
+        width: 100%; /* Make the button width same as input and textarea */
+        background-color: #007bff; /* Blue color for the button */
+        color: #fff; /* Text color for the button */
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .top .button-container button:hover {
+        background-color: #0056b3; /* Darker blue on hover */
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="heading">
+            <h1>📝 Private Notes</h1>
+            <h3 style="margin: 10px;"><i>Your personal note repository..!!</i></h3>
+        </div>
+        <div class="top">
+            <form id="noteForm" method="POST" action="/">
+                <input type="text" name="title" placeholder="Enter a title"><br><br>
+                <textarea name="note" id="noteTextarea" placeholder="Enter a note" rows="5" cols="50"></textarea> 
+                <div class="button-container">
+                    <input type="hidden" name="action" value="add"> 
+                    <button type="submit" class="update-remove">Add Note</button>
+                </div>
+            </form>
+        </div>
+        <div class="todo" id="noteContainer">
+            <!-- Notes will be added here dynamically -->
+        </div>
+    </div>
+    <script>
+        document.getElementById("noteForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            addNote();
+        });
+
+        function addNote() {
+            var title = document.querySelector("#noteForm [name=title]").value;
+            var note = document.querySelector("#noteForm [name=note]").value;
+            var alignment = document.querySelectorAll(".note").length % 3 == 0 ? "left" : (document.querySelectorAll(".note").length % 3 == 1 ? "center" : "right");
+            var color = getRandomColor();
+
+            var noteElement = document.createElement("div");
+            noteElement.classList.add("note", alignment);
+            noteElement.style.backgroundColor = color;
+
+            var titleElement = document.createElement("h3");
+            titleElement.textContent = title;
+
+            var noteContentElement = document.createElement("p");
+            noteContentElement.textContent = note;
+
+            var editButton = document.createElement("button");
+            editButton.innerHTML = '<i class="fas fa-edit"></i>'; // Edit icon from Font Awesome
+            editButton.classList.add("edit-button");
+            editButton.onclick = function() {
+                editNoteContent(noteContentElement);
+            };
+
+            var deleteButton = document.createElement("button");
+            deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>'; // Delete icon from Font Awesome
+            deleteButton.classList.add("delete-button");
+            deleteButton.onclick = function() {
+                deleteNoteElement(noteElement);
+            };
+
+            noteElement.appendChild(titleElement);
+            noteElement.appendChild(noteContentElement);
+            noteElement.appendChild(editButton);
+            noteElement.appendChild(deleteButton);
+
+            document.getElementById("noteContainer").appendChild(noteElement);
+
+            document.getElementById("noteForm").reset();
+        }
+
+        function getRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function editNoteContent(noteContentElement) {
+            var newContent = prompt("Enter the new content:");
+            if (newContent !== null) {
+                noteContentElement.textContent = newContent;
+            }
+        }
+
+        function deleteNoteElement(noteElement) {
+            noteElement.remove();
+        }
+    </script>
+</body>
+</html>
